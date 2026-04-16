@@ -7,6 +7,12 @@ interface Partner {
   alt: string;
 }
 
+/**
+ * Bionic Solutions — certified technology partners.
+ *
+ * Logo files live in /public/images/partners/ and must be the official
+ * partner badges provided by each vendor's partner program.
+ */
 const partners: Partner[] = [
   {
     name: 'Google',
@@ -41,13 +47,13 @@ export const Partners = () => {
       id="partners"
       className="py-24 md:py-32 bg-bg-primary relative overflow-hidden"
     >
-      {/* Subtle accent glow */}
+      {/* Electric-blue signature glow — brand: 90% dark, 10% electric */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse at top, rgba(0, 191, 255, 0.08), transparent 60%)',
+            'radial-gradient(ellipse at top, rgba(0, 191, 255, 0.10), transparent 60%)',
         }}
       />
 
@@ -56,50 +62,72 @@ export const Partners = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="inline-flex items-center px-4 py-2 rounded-full border border-accent-primary/30 bg-accent-primary/5 mb-6"
           >
-            <span className="text-small text-accent-primary font-semibold tracking-wide uppercase">
-              Strategic Alliances
+            <span className="text-small text-accent-primary font-semibold tracking-wider uppercase">
+              Certified Alliances
             </span>
           </motion.div>
 
           <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-h2 md:text-[38px] lg:text-h2 font-bold mb-6"
+            initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
+            animate={
+              inView ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}
+            }
+            transition={{ duration: 0.8, delay: 0.1 }}
+            className="text-h2 md:text-[48px] lg:text-h2 font-bold mb-6 tracking-tight"
           >
-            Our <span className="text-accent-primary">Technology Partners</span>
+            Engineered with the{' '}
+            <span className="text-accent-primary">world's best</span>.
           </motion.h2>
 
           <motion.p
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-h4 md:text-h3 text-text-muted max-w-4xl mx-auto"
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-h4 md:text-h3 text-text-muted max-w-4xl mx-auto font-normal"
           >
-            As a trusted IT system integrator, we partner with the world's
-            leading technology vendors to deliver enterprise-grade solutions
-            built on platforms you can rely on.
+            We design intelligence into business — backed by certified
+            partnerships with the platforms that power modern enterprises.
           </motion.p>
         </div>
 
-        {/* Partner logo grid */}
+        {/* Partner logo grid — brand: glass cards, electric hover glow */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-6xl mx-auto">
           {partners.map((partner, index) => (
             <motion.div
               key={partner.name}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
-              className="group relative bg-bg-secondary rounded-xlarge border border-white/5 p-8 md:p-10 flex items-center justify-center min-h-[160px] md:min-h-[180px] hover:border-accent-primary/50 hover:-translate-y-1 transition-all duration-300"
+              initial={{ opacity: 0, y: 30, filter: 'blur(8px)' }}
+              animate={
+                inView
+                  ? { opacity: 1, y: 0, filter: 'blur(0px)' }
+                  : {}
+              }
+              transition={{
+                duration: 0.8,
+                delay: 0.3 + index * 0.1,
+                ease: [0.25, 0.46, 0.45, 0.94],
+              }}
+              className="group relative rounded-2xl border border-white/[0.08] backdrop-blur-md bg-white/[0.02] p-8 md:p-10 flex items-center justify-center min-h-[160px] md:min-h-[180px] transition-all duration-300 hover:border-accent-primary/60 hover:-translate-y-1"
+              style={{
+                boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.04)',
+              }}
             >
+              {/* Electric-blue hover glow (brand motion spec) */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                style={{
+                  boxShadow: '0 0 24px rgba(0, 191, 255, 0.35)',
+                }}
+              />
+
               <img
                 src={partner.logo}
                 alt={partner.alt}
                 loading="lazy"
-                className="max-h-16 md:max-h-20 w-auto object-contain transition-all duration-300 group-hover:scale-105"
+                className="relative max-h-16 md:max-h-20 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
               />
             </motion.div>
           ))}
@@ -109,13 +137,13 @@ export const Partners = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.8 }}
+          transition={{ duration: 0.8, delay: 0.8 }}
           className="mt-16 text-center"
         >
           <p className="text-body text-text-muted">
-            Certified partnerships, enterprise-grade platforms,{' '}
+            Enterprise-grade platforms,{' '}
             <span className="text-text-primary font-semibold">
-              delivered across Saudi Arabia and the GCC.
+              delivered with precision across Saudi Arabia and the GCC.
             </span>
           </p>
         </motion.div>
