@@ -20,11 +20,6 @@ const partners: Partner[] = [
     alt: 'Google Partner',
   },
   {
-    name: 'Microsoft',
-    logo: '/images/partners/microsoft-solutions-partner.png',
-    alt: 'Microsoft Solutions Partner',
-  },
-  {
     name: 'Intel',
     logo: '/images/partners/intel-partner.png',
     alt: 'Intel Partner',
@@ -94,7 +89,7 @@ export const Partners = () => {
         </div>
 
         {/* Partner logo grid — brand: glass cards, electric hover glow */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
           {partners.map((partner, index) => (
             <motion.div
               key={partner.name}
