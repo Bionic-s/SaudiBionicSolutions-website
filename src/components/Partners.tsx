@@ -21,7 +21,7 @@ const partners: Partner[] = [
   },
   {
     name: 'Intel',
-    logo: '/images/partners/intel-partner.png',
+    logo: '/images/partners/intel-partner.webp',
     alt: 'Intel Partner',
   },
   {
