@@ -3,6 +3,7 @@ import { ProvenExperience } from '../components/ProvenExperience';
 import { CaseStudies } from '../components/CaseStudies';
 import { Contact } from '../components/Contact';
 import { SolutionsHubVisual } from '../components/SolutionsHubVisual';
+import { Partners } from '../components/Partners';
 
 import { UrgencyBanner } from '../components/UrgencyBanner';
 
@@ -11,11 +12,12 @@ export default function HomePage() {
     <>
       <Hero />
       <UrgencyBanner />
-      
+
       {/* Stelligence-Inspired Solutions Hub */}
       <SolutionsHubVisual />
-      
+
       <ProvenExperience />
+      <Partners />
       <CaseStudies />
       <Contact />
     </>
