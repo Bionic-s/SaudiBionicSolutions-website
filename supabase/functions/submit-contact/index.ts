@@ -32,9 +32,17 @@ Deno.serve(async (req) => {
             throw new Error('Name and email are required');
         }
 
-        // Get Resend API key from environment
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            throw new Error('Invalid email format');
+        }
+
+        // Get email config from environment (with sensible defaults)
         const resendApiKey = Deno.env.get('RESEND_API_KEY');
-        
+        const notificationEmail = Deno.env.get('NOTIFICATION_EMAIL') || 'm.aljawharji@bionics.com.sa';
+        const fromEmail = Deno.env.get('FROM_EMAIL') || 'Bionic Solutions <onboarding@resend.dev>';
+
         if (!resendApiKey) {
             throw new Error('Resend API key not configured');
         }
@@ -249,63 +257,12 @@ Bionic Solutions Website
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                from: 'Bionic Solutions <onboarding@resend.dev>',
-                to: ['x8.mattuzo@gmail.com'], // Verified account owner email (free tier limitation)
-                subject: `🔔 URGENT: New Discovery Call Booking - ${name}`,
-                html: htmlContent + `
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #FF6B35; border-radius: 8px; padding: 20px; margin: 30px 0; border: 2px solid #FF4500;">
-                        <tr>
-                            <td>
-                                <h2 style="margin: 0 0 15px 0; font-size: 18px; font-weight: 700; color: #FFFFFF; text-align: center;">
-                                    📧 FORWARD IMMEDIATELY
-                                </h2>
-                                <p style="margin: 0; font-size: 16px; font-weight: 600; color: #FFFFFF; text-align: center; line-height: 1.6;">
-                                    This booking request MUST be forwarded to:
-                                </p>
-                                <p style="margin: 10px 0 0 0; font-size: 18px; font-weight: 700; color: #FFFFFF; text-align: center; text-decoration: underline;">
-                                    m.aljawharji@bionics.com.sa
-                                </p>
-                                <p style="margin: 15px 0 0 0; font-size: 14px; color: #FFF; text-align: center; line-height: 1.5;">
-                                    Client is waiting for response. Please contact within 24 hours.
-                                </p>
-                            </td>
-                        </tr>
-                    </table>
-                    <!-- Email Setup Guide -->
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #1A1D23; border-radius: 8px; padding: 20px; margin: 30px 0; border: 1px solid #2A2D33;">
-                        <tr>
-                            <td>
-                                <h3 style="margin: 0 0 15px 0; font-size: 16px; font-weight: 600; color: #00BFFF;">
-                                    📧 Email Setup Guide
-                                </h3>
-                                <p style="margin: 0 0 15px 0; font-size: 14px; color: #9AA4AF; line-height: 1.5;">
-                                    <strong>Option 1 - Automatic Forwarding:</strong>
-                                </p>
-                                <ul style="margin: 0 0 15px 0; padding-left: 20px; font-size: 14px; line-height: 1.6; color: #9AA4AF;">
-                                    <li>Set up email forwarding from this inbox to <strong style="color: #FFFFFF;">m.aljawharji@bionics.com.sa</strong></li>
-                                    <li>Configure auto-responder to acknowledge receipt</li>
-                                </ul>
-                                <p style="margin: 0 0 15px 0; font-size: 14px; color: #9AA4AF; line-height: 1.5;">
-                                    <strong>Option 2 - Professional Setup:</strong>
-                                </p>
-                                <ul style="margin: 0 0 0 0; padding-left: 20px; font-size: 14px; line-height: 1.6; color: #9AA4AF;">
-                                    <li>Upgrade Resend to paid plan ($20/month)</li>
-                                    <li>Verify <strong style="color: #FFFFFF;">bionics.com.sa</strong> domain</li>
-                                    <li>Send directly to m.aljawharji@bionics.com.sa</li>
-                                </ul>
-                            </td>
-                        </tr>
-                    </table>
-                `,
-                text: textContent + `
-
-🔔 FORWARD IMMEDIATELY 🔔
-This booking request MUST be forwarded to: m.aljawharji@bionics.com.sa
-
-Client is waiting for response. Please contact within 24 hours.
-
-System Note: Due to email service limitations, this notification requires manual forwarding. 
-For automatic delivery, upgrade Resend plan to verify bionics.com.sa domain.`,
+                from: fromEmail,
+                to: [notificationEmail],
+                reply_to: email,
+                subject: `New Discovery Call Booking - ${name}`,
+                html: htmlContent,
+                text: textContent,
             }),
         });
 
@@ -495,7 +452,7 @@ The Bionic Solutions Team
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                from: 'Bionic Solutions <onboarding@resend.dev>',
+                from: fromEmail,
                 to: [email],
                 subject: 'Discovery Call Booking Confirmed - Bionic Solutions',
                 html: customerHtmlContent,

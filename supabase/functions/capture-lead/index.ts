@@ -1,4 +1,14 @@
-// Email sending function using Resend API
+// Shared email config (env vars with sensible defaults)
+function getEmailConfig() {
+  return {
+    apiKey: Deno.env.get('RESEND_API_KEY'),
+    notificationEmail: Deno.env.get('NOTIFICATION_EMAIL') || 'm.aljawharji@bionics.com.sa',
+    fromEmail: Deno.env.get('FROM_EMAIL') || 'Bionic Solutions <onboarding@resend.dev>',
+    siteUrl: Deno.env.get('SITE_URL') || 'https://bionic-solutions.com.sa',
+  };
+}
+
+// Notify the business owner when a new lead is captured
 async function sendLeadNotification(leadData: {
   name: string | null;
   email: string;
@@ -6,9 +16,9 @@ async function sendLeadNotification(leadData: {
   stage: string;
   source: string;
 }) {
-  const resendApiKey = Deno.env.get('RESEND_API_KEY');
-  
-  if (!resendApiKey) {
+  const { apiKey, notificationEmail, fromEmail } = getEmailConfig();
+
+  if (!apiKey) {
     console.warn('RESEND_API_KEY not configured - email notification skipped');
     return null;
   }
@@ -29,8 +39,9 @@ From: Bionic Solutions Lead Capture System
 
   try {
     const emailPayload = {
-      from: 'onboarding@resend.dev',
-      to: ['m.aljawharji@bionics.com.sa'],
+      from: fromEmail,
+      to: [notificationEmail],
+      reply_to: leadData.email,
       subject: `New Lead Captured - ${leadData.name || leadData.email}`,
       text: emailContent,
       html: `
@@ -52,11 +63,11 @@ From: Bionic Solutions Lead Capture System
         </div>
       `
     };
-    
+
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(emailPayload)
@@ -74,6 +85,56 @@ From: Bionic Solutions Lead Capture System
 
   } catch (error) {
     console.error('Email sending error:', error);
+    return null;
+  }
+}
+
+// Send the lead an auto-reply with the Enterprise Framework Guide
+async function sendLeadAutoReply(leadData: { name: string | null; email: string; magnet_type?: string }) {
+  const { apiKey, fromEmail, siteUrl } = getEmailConfig();
+  if (!apiKey) return null;
+
+  const displayName = leadData.name || 'there';
+  const guideUrl = `${siteUrl}/assets/Bionic_Enterprise_Framework_Implementation_Guide.pdf`;
+
+  try {
+    const emailResponse = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: fromEmail,
+        to: [leadData.email],
+        subject: 'Your Bionic Solutions Enterprise Framework Guide',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #0B0D10;">
+            <h2 style="color: #00BFFF;">Thanks, ${displayName}!</h2>
+            <p>Here is your copy of the <strong>Bionic Solutions Enterprise Framework Implementation Guide</strong>.</p>
+            <p style="margin: 24px 0;">
+              <a href="${guideUrl}" style="background: #00BFFF; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                Download the Guide (PDF)
+              </a>
+            </p>
+            <p>If the button doesn't work, copy this link:<br><a href="${guideUrl}">${guideUrl}</a></p>
+            <p>Our team will reach out within 24 hours if you'd like to discuss how the framework applies to your business.</p>
+            <p style="margin-top: 32px;">Best regards,<br><strong>The Bionic Solutions Team</strong></p>
+          </div>
+        `,
+        text: `Thanks, ${displayName}!\n\nHere is your copy of the Bionic Solutions Enterprise Framework Implementation Guide:\n${guideUrl}\n\nOur team will reach out within 24 hours if you'd like to discuss how the framework applies to your business.\n\nBest regards,\nThe Bionic Solutions Team`,
+      }),
+    });
+
+    if (!emailResponse.ok) {
+      const errorText = await emailResponse.text();
+      console.error('Auto-reply failed:', errorText);
+      return { error: errorText };
+    }
+
+    return await emailResponse.json();
+  } catch (error) {
+    console.error('Auto-reply error:', error);
     return null;
   }
 }
@@ -187,7 +248,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Send email notification
+    // Send email notification to business owner
     const emailResult = await sendLeadNotification({
       name: name || null,
       email,
@@ -196,12 +257,20 @@ Deno.serve(async (req) => {
       source: requestData.source || 'website'
     });
 
+    // Send auto-reply with the framework guide to the lead
+    const autoReplyResult = await sendLeadAutoReply({
+      name: name || null,
+      email,
+      magnet_type
+    });
+
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         message: 'Lead captured successfully',
         leadId,
-        emailSent: emailResult ? true : false
+        emailSent: emailResult ? true : false,
+        autoReplySent: autoReplyResult ? true : false
       }),
       {
         status: 200,

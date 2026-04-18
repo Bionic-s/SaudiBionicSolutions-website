@@ -20,9 +20,18 @@ Deno.serve(async (req) => {
             throw new Error('Name and email are required');
         }
 
-        // Get Resend API key from environment
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            throw new Error('Invalid email format');
+        }
+
+        // Get email config from environment (with sensible defaults)
         const resendApiKey = Deno.env.get('RESEND_API_KEY');
-        
+        const notificationEmail = Deno.env.get('NOTIFICATION_EMAIL') || 'm.aljawharji@bionics.com.sa';
+        const fromEmail = Deno.env.get('FROM_EMAIL') || 'Bionic Solutions <onboarding@resend.dev>';
+        const siteUrl = Deno.env.get('SITE_URL') || 'https://bionic-solutions.com.sa';
+
         if (!resendApiKey) {
             throw new Error('Resend API key not configured');
         }
@@ -199,8 +208,9 @@ Bionic Solutions Website
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                from: 'Bionic Solutions <onboarding@resend.dev>',
-                to: ['x8.mattuzo@gmail.com'],
+                from: fromEmail,
+                to: [notificationEmail],
+                reply_to: email,
                 subject: `New Contact Form Submission - ${name}`,
                 html: htmlContent,
                 text: textContent,
@@ -224,7 +234,7 @@ Bionic Solutions Website
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                from: 'Bionic Solutions <onboarding@resend.dev>',
+                from: fromEmail,
                 to: [email],
                 subject: 'Thank you for contacting Bionic Solutions',
                 html: `
@@ -233,7 +243,7 @@ Bionic Solutions Website
                         <p>Dear ${name},</p>
                         <p>Thank you for reaching out to us. We have received your inquiry and will respond within 24 hours.</p>
                         <p>In the meantime, you might find our Enterprise Framework Implementation Guide helpful:</p>
-                        <p><a href="https://sfqfik2njw3n.space.minimax.io/assets/Bionic_Enterprise_Framework_Implementation_Guide.pdf" style="background-color: #00BFFF; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Download Framework Guide</a></p>
+                        <p><a href="${siteUrl}/assets/Bionic_Enterprise_Framework_Implementation_Guide.pdf" style="background-color: #00BFFF; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Download Framework Guide</a></p>
                         <p>Best regards,<br>The Bionic Solutions Team</p>
                     </div>
                 `,
